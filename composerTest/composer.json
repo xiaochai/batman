@@ -1,0 +1,19 @@
+{
+	"require": {
+		"monolog/monolog": "1.23.*",
+		"xiaochai/phplib": "dev-master"
+	},
+	"autoload":{
+		"psr-4":{
+			"Ns1\\":"Ns1/"
+		}
+	},
+	"repositories":[
+		{
+			"type":"vcs",
+			"url":"https://github.com/xiaochai/phplib"
+		}
+	]
+	
+}
+
