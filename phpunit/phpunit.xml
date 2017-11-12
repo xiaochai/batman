@@ -1,0 +1,29 @@
+<phpunit bootstrap="./autoload.php" beStrictAboutTestsThatDoNotTestAnything="false">
+	<testsuites>
+		<testsuite name="money">
+			<file></file>
+			<directory suffix=".php"> ./test/</directory>
+		</testsuite>
+	</testsuites>
+	<php>
+		<var name="DB_DSN" value="mysql:dbname=test;host=localhost" />
+		<var name="DB_USER" value="root" />
+		<var name="DB_PASSWD" value="root" />
+		<var name="DB_DBNAME" value="test" />
+	</php>
+
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true" addUncoveredFilesFromWhitelist="true">
+			<directory suffix=".php">./</directory>
+			<file></file>
+			<exclude>
+				<directory suffix=".php">./vendor</directory>
+				<file>./test/tmp.php</file>
+			</exclude>
+		</whitelist>
+	</filter>
+	<logging>
+		<log type="coverage-html" target="/var/www/html/coverage/" />
+	</logging>
+
+</phpunit>

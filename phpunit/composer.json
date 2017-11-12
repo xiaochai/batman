@@ -1,0 +1,10 @@
+{
+    "name": "liqingshou/phpuint",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6.4",
+        "phpunit/php-invoker": "^1.1",
+        "phpunit/dbunit": "^3.0",
+        "phpunit/php-code-coverage": "^5.2"
+    }
+}
