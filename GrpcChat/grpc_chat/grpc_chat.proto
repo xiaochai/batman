@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.grpc_chat";
+option java_outer_classname = "GrpcChat";
+
+package grpc_chat;
+
+service ChatService{
+	rpc ExchangeNames(Names) returns (Names);
+	rpc GetList(Count) returns (stream Names);
+	rpc SendList(stream Names) returns (Count);
+	rpc Chat(stream Msg) returns (stream Msg);
+}
+
+message Count {
+    int32 count = 1;
+    int32 offset = 2;
+}
+
+message Names {
+	string firstName = 1;
+	string secondName = 2;
+}
+
+message Msg {
+	string sender = 1;
+	string msg = 2;
+}
