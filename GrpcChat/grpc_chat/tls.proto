@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "grpc_chat.proto";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.grpc_chat";
+option java_outer_classname = "GrpcChat";
+
+package grpc_chat;
+
+service TlsService{
+	rpc SendMsg(Msg) returns (Msg);
+}

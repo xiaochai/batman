@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-//go:generate protoc -I ../grpc_chat --go_out=plugins=grpc:../grpc_chat ../grpc_chat/grpc_chat.proto
+//go:generate protoc -I ../grpc_chat --go_out=plugins=grpc:../grpc_chat ../grpc_chat/tls.proto ../grpc_chat/grpc_chat.proto
 
 type chatService struct{}
 
