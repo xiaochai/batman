@@ -21,7 +21,7 @@ func unaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServ
 	md, ok := metadata.FromIncomingContext(ctx);
 	if !ok {
 		return nil, errors.New("unaryInterceptor FromIncomingContext not ok ")
-	}else if pass, ok := md["lqs"]; !ok || pass[0] != "pass123" {
+	}else if pass, ok := md["auth"]; !ok || pass[0] != "pass1234" {
 		return nil, errors.New("auth failed");
 	}else{
 		log.Println("auth succ")

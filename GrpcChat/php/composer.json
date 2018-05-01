@@ -1,0 +1,14 @@
+{
+    "name": "grpc_chat/php",
+    "require": {
+        "grpc/grpc": "^1.10",
+        "google/protobuf": "^v3.3.0"
+
+    },
+    "authors": [
+        {
+            "name": "xiaochai",
+            "email": "soso2501@gmail.com"
+        }
+    ]
+}
