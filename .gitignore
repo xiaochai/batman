@@ -1,2 +1,5 @@
 *.swp
 *.out
+out
+build
+.idea
