@@ -1,4 +1,4 @@
-package Command;
+package DesignPatterns.Command;
 
 import org.junit.Test;
 
