@@ -208,7 +208,7 @@ quitSort1 [] = []
 quitSort1 (x:xs) = quitSort1 min ++ [x] ++ quitSort1 max
                   where min = filter (<x) xs;max = filter (>=x) xs
 
--- 归并排序，即将两个已经排好充的列表合并成一个有序的列表
+-- 归并排序，即将两个已经排好序的列表合并成一个有序的列表
 mergeSort :: Ord a => [a] -> [a]
 -- 辅助函数，将两个有序的列表合并成一个
 mergeSortList ::Ord a => [a] -> [a] -> [a]

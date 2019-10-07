@@ -215,7 +215,7 @@ showExp (Plus a b) = "(" ++ showExp a ++ "+" ++ showExp b ++ ")"
 showExp (Sub a b) = "(" ++ showExp a ++ "-" ++ showExp b ++ ")"
 showExp (Mult a b) = "(" ++ showExp a ++ "*" ++ showExp b ++ ")"
 showExp (Div a b) = "(" ++ showExp a ++ "/" ++ showExp b ++ ")"
--- 将列表分成两部分，这两部分的数据可以执行四则运算，然后再对长度dddgf1的列表再递归划分
+-- 将列表分成两部分，这两部分的数据可以执行四则运算，然后再对长度大于1的列表再递归划分
 divide :: [a] -> [([a],[a])]
 divide xs = [(take n xs, drop n xs)| n<- [1..(length xs -1)]]
 -- 根据元组，拼合成四则运算
