@@ -1,4 +1,4 @@
-package designpatterns.restaurent.Combine;
+package designpatterns.restaurent.combine;
 
 public class MenuItem extends MenuComponent {
     private String name, desc;

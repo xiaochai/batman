@@ -1,4 +1,4 @@
-package designpatterns.restaurent.Iterator;
+package designpatterns.restaurent.iterator;
 
 public class MenuItem {
     public String name, desc;

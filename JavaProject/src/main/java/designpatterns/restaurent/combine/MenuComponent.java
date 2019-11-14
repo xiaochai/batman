@@ -1,4 +1,4 @@
-package designpatterns.restaurent.Combine;
+package designpatterns.restaurent.combine;
 
 public abstract class MenuComponent {
     public void add(MenuComponent menuComponent) {

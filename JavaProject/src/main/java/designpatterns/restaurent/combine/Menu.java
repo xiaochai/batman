@@ -1,4 +1,4 @@
-package designpatterns.restaurent.Combine;
+package designpatterns.restaurent.combine;
 
 import java.util.ArrayList;
 

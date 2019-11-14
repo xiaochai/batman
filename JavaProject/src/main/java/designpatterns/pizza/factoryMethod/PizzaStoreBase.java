@@ -1,4 +1,4 @@
-package designpatterns.pizza.FactoryMethod;
+package designpatterns.pizza.factoryMethod;
 
 import designpatterns.pizza.Pizza;
 

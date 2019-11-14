@@ -1,15 +1,15 @@
-package designpatterns.pizza.FactoryInterface;
+package designpatterns.pizza.factoryInterface;
 
+import designpatterns.pizza.CheesePizza;
 import designpatterns.pizza.NormalPizz;
 import designpatterns.pizza.Pizza;
-import designpatterns.pizza.VeggiePizza;
 
-public class PizzaFactory2 implements PizzaFactory {
+public class PizzaFactory1 implements PizzaFactory {
     @Override
     public Pizza createPizza(String type) {
         Pizza pizza;
-        if (type.equals("veggie")) {
-            pizza = new VeggiePizza();
+        if (type.equals("cheese")) {
+            pizza = new CheesePizza();
         } else {
             pizza = new NormalPizz();
         }

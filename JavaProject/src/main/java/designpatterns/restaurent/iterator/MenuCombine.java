@@ -1,4 +1,4 @@
-package designpatterns.restaurent.Iterator;
+package designpatterns.restaurent.iterator;
 
 import java.util.HashMap;
 import java.util.Iterator;
