@@ -26,6 +26,10 @@ dependencies {
     // This dependency is found on compile classpath of this component and consumers.
     implementation 'com.google.guava:guava:26.0-jre'
     implementation 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation 'io.netty:netty-all:4.1.43.Final'
+    implementation 'io.lettuce:lettuce-core:5.2.1.RELEASE'
+    implementation 'io.projectreactor:reactor-core:3.3.1.RELEASE'
+//    implementation 'org.projectlombok:lombok:1.18.10'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
@@ -34,4 +38,4 @@ dependencies {
 }
 
 // Define the main class for the application
-mainClassName = 'designpatterns.App'
+mainClassName = 'javaProject.App'
