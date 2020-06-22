@@ -6,3 +6,6 @@ build
 *.hi
 *.o
 .vscode
+Python/a.db
+Python/a
+__pycache__

@@ -1,0 +1,1 @@
+def rectangle(): pass
