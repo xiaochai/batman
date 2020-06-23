@@ -9,3 +9,4 @@ build
 Python/a.db
 Python/a
 __pycache__
+Python/my.db
