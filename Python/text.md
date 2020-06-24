@@ -2761,9 +2761,174 @@ Your code has been rated at -8.00/10 (previous run: -8.00/10, +0.00)
 
 标准版Python:CPython的扩展：
 
+编写扩展思路与PHP写扩展的思路是一样的，只是Python中有一个swig工具可以简化这一部分的工作。
+
+例如我们要写一个简单的回文检测函数，涉及到palindrome.c和palindrome.i两个文件，代码如下：
+
+```c
+#include <string.h>
+int is_palindrome(char *text) { 
+    int i, n=strlen(text);
+    for (i = 0; i <= n/2; ++i) {
+        if (text[i] != text[n-i-1]) 
+            return 0; 
+    }
+    return 1; 
+}
+```
+
+```c
+%module palindrome
+%{
+#include <string.h> 
+%}
+extern int is_palindrome(char *text);
+```
+
+使用
+```bash
+swig -python -module myp palindrome.i 
+```
+命令会自动生成palindrome_wrap.c文件，并指定扩展的模块名称为myp，生成myp.py这个模块的封装代码；
+
+然后将这两个文件.c文件编译成共享链接库：
+
+```bash
+gcc -I/usr/local/Cellar/python@3.8/3.8.3/Frameworks/Python.framework/Versions/3.8/include/python3.8/ -shared palindrome_wrap.c palindrome.c -lpython3.8 -L/usr/local/Cellar/python@3.8/3.8.3/Frameworks/Python.framework/Versions/3.8/lib/ -o _myp.so
+```
+
+其中-I指定头文件的搜索目录，-L指定了链接库的搜索目录，而-l指定了需要链接的python的动态链接库，这是我在mac上的路径，其它环境有可能不一样；注意动态链接库的名称需要是模块名前添加下划线。
+
+这样就可以使用myp这个模块了：
+
+```bash
+$ PYTHONPATH=$PYTHOPATH:./ python3
+>>> import myp
+m>>> myp.is_palindrome("abba")
+1
+>>> import _myp
+>>> _myp.is_palindrome("abbaa")
+0
+```
+可以看出如果使用import myp则加载的是myp.py，而这个封装文件最终也是使用的_myp.so这个动态库，与直接使用import _myp是一样的结果。
+
+
+如果手写扩展需要处理好引用计数相关的问题，可以参考[此](https://www.cnblogs.com/jianmu/p/7367698.html)与[此](https://docs.python.org/2.0/ext/intro.html)。以下是不用swig手写的回文字符串检测palindrome1.c：
+
+```c
+#include <Python.h>
+#include <string.h>
+
+/**
+ * 定义的目标函数，函数的返回值必须是*PyObject，self指向模块本身，args参数包含所有传入的参数
+ */
+static PyObject *is_palindrom(PyObject *self, PyObject *args){
+    int i, n;
+    const char *text;
+    // 传入的参数可以使用PyArg_ParseTuple按一定的格式解析到对应的变量中，其中s表示是字符串
+    if (!PyArg_ParseTuple(args, "s", &text)){
+        return NULL;
+    }
+    n = strlen(text);
+    // 这次将返回值改成返回True和False
+    for (i = 0; i<= n/2; i++){
+        if (text[i] != text[n-i-1]){
+            Py_INCREF(Py_False);
+            return Py_False;
+        }
+    }
+    // 需要增加Py_True的引用计数的数量
+    Py_INCREF(Py_True);
+    // 如果是要返回整数1的话可以使用Py_BuildValue("i", 1);
+    return Py_True;
+}
+
+// 导出的方法列表定义，在PyModuleDef中使用，而PyModuleDef又在PyInit_modulename上使用
+static PyMethodDef PalindromeMethods[] = {
+    // 名称(这影响在python中调用时的名字)、具体的函数、参数类型、文档
+    {"is_palindrom1", is_palindrom, METH_VARARGS, "Dected palindromes"},
+    // 列表结束标志
+    {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef palindrome = 
+{
+    PyModuleDef_HEAD_INIT,
+    "palindrome1", // 模块名，好像改完之后没有啥效果，只是在help时会在NAME里体现
+    "", // 文档
+    -1, // 存储在全局变量中的信号状态
+    PalindromeMethods // 方法列表
+};
+
+// 初始化模块的函数，PyInit_modulename，名字必须是这样的命名规则
+PyMODINIT_FUNC PyInit_palindrome1(void){
+    return PyModule_Create(&palindrome);
+}
+
+
+// 编译: gcc -I/usr/local/Cellar/python@3.8/3.8.3/Frameworks/Python.framework/Versions/3.8/include/python3.8/ -shared  -lpython3.8 -L/usr/local/Cellar/python@3.8/3.8.3/Frameworks/Python.framework/Versions/3.8/lib/ palindrome1.c -o palindrome1.so -v
+
+// >>> import palindrome1
+// >>> palindrome1.is_palindrom1("FD")
+// False
+// >>> palindrome1.is_palindrom1("ABBA")
+// True
+```
+
+另外一种不用手工编译的方式就是使用setuptools提供的方法：
+
+```python
+from setuptools import setup, Extension
+
+setup(
+    name = 'palindrome1',
+    version = '1.0',
+    ext_modules = [
+        Extension('palindrome1', ['palindrome1.c'])
+    ]
+)
+```
+
+```
+$ python3 setup.py build_ext
+running build_ext
+building 'palindrome1' extension
+creating build
+creating build/temp.macosx-10.15-x86_64-3.8
+clang -Wno-unused-result -Wsign-compare -Wunreachable-code -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers -I/usr/local/include -I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/sqlite/include -I/usr/local/Cellar/python@3.8/3.8.3/Frameworks/Python.framework/Versions/3.8/include/python3.8 -c palindrome1.c -o build/temp.macosx-10.15-x86_64-3.8/palindrome1.o
+creating build/lib.macosx-10.15-x86_64-3.8
+clang -bundle -undefined dynamic_lookup -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk build/temp.macosx-10.15-x86_64-3.8/palindrome1.o -L/usr/local/lib -L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/sqlite/lib -o build/lib.macosx-10.15-x86_64-3.8/palindrome1.cpython-38-darwin.so
+$ cd build/lib.macosx-10.15-x86_64-3.8
+$ PYTHONPATH=$PYTHOPATH:./ python3
+>>> import palindrome1
+>>> palindrome1.is_palindrom1("daf")
+False
+>>> palindrome1.__file__
+'/Users/liqingshou/Work/xiaochai/batman/Python/ext/build/lib.macosx-10.15-x86_64-3.8/palindrome1.cpython-38-darwin.so'
+>>>
+```
 
 
 ## 程序打包
+
+程序打包的概念与PHP的phar文件一样，在Python中有两种格式egg和wheel(后缀为whl)，wheel将会逐渐取代egg。另外pi2exe扩展可以打包成windows平台的exe文件，而且不需要用户安装额外的解释器。
+
+通过在PyPI上注册还可以让别人使用pip来安装你开发的包，这块可以参考[官方教程](https://packaging.python.org/tutorials/packaging-projects/)。
+
+```python
+# setuptools可以帮忙处理一些事情
+# 运行python3 setup.py install将在dist目录下生成egg文件
+# setup.py文件内容
+from setuptools import setup
+
+setup(
+    name = "hello",
+    version = "1.0",
+    description = "simple example",
+    author = "Lee",
+    py_modules = ["hello"]
+)
+```
 
 ## 参考
 

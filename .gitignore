@@ -10,3 +10,6 @@ Python/a.db
 Python/a
 __pycache__
 Python/my.db
+dist
+hello.egg-info
+*.so
