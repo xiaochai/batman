@@ -13,3 +13,5 @@ Python/my.db
 dist
 hello.egg-info
 *.so
+.DS_Store
+Python/.DS_Store

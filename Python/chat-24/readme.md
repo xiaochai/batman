@@ -1,0 +1,5 @@
+通过继承asyncore模块的dispatcher可以实现同时处理多条连接，只要实现handle_accept方法即可。
+
+通过accept返回的connection通过使用从asynchat模块的async_chat继承来的类，只要实现collect_incoming_data读取数据和found_terminator数据读取结束方法即可完成数据的读取和响应
+
+至于handler，使用了状态机的方式，刚开始时是LoginRoom，支持login name的命令，登录完成后进入chatroom，支持say something的广播操作，同时还可以使用look和who来查看直播间里的人。
