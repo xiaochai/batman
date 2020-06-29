@@ -15,3 +15,4 @@ hello.egg-info
 *.so
 .DS_Store
 Python/.DS_Store
+.jython_cache/
