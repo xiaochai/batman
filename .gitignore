@@ -16,3 +16,4 @@ hello.egg-info
 .DS_Store
 Python/.DS_Store
 .jython_cache/
+target
