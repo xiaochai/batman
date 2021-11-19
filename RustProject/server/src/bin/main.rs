@@ -9,7 +9,7 @@ fn main() {
     // bind接收泛型参数，只要实现了ToSocketAddrs即可，例如String类型，不管是&str还是String都行
     let listener = TcpListener::bind("localhost:8888".to_string()).unwrap();
 
-    let thread_pool = ThreadPool::new(10);
+    let thread_pool = ThreadPool::new(2);
 
 
     // TcpListener的incoming返回迭代器，产生std::io::Result<TcpStream>类型
