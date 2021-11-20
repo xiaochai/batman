@@ -131,10 +131,15 @@ fn main() {
         println!("main end");
         // 手动使用std::mem::drop函数来提前清理_c的值
         drop(_a);
+        // 没有使用的变量直接drop
+        TestDropStruct { data: "no left val".to_string() };
+        println!("real main end！！！！！！！！");
 
         // 以上输出顺序为
         // main end
         // first object
+        // no left val
+        // real main end！！！！！！！！
         // third object
         // second object
         // 对于_b，_c来说，丢弃顺序与创建顺序相反，所以_c先调用drop函数
