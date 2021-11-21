@@ -39,7 +39,7 @@ fn main() {
     // 整数溢出
     let x: u8 = 252;
     let y: u8 = ("32").parse().expect("not ok");
-    // 在debug模式编译时，会在运行进报错
+    // 以下行在debug模式下，会在运行时报错
     // thread 'main' panicked at 'attempt to add with overflow', src/main.rs:41:26
     // note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
     // 在release模式下，则不会报错，输出28

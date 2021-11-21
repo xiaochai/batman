@@ -51,7 +51,7 @@ fn main() {
         fn announce_and_return_part(&self, announcement: &str) -> &str {
             self.part
         }
-        // 应用第一条和第三条规则，得出的生命周期不正确，所以编译报错
+        // 应用第一条和第三条规则，得出的生命周期不正确，所以在没有生命周期房间里时编译报错
         fn display_part_and_return<'b>(&self, announcement: &'b str) -> &'b str {
             announcement
         }
