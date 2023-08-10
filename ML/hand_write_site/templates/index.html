@@ -1,0 +1,141 @@
+<html lang="en">
+
+<head>
+    <title>Hand Write Number Recognize</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <style>
+        .main {
+            text-align: center;
+        }
+
+        #myCanvas {
+            border: 1px solid rgb(103, 194, 58);
+            box-shadow: 0 2px 4px rgba(103, 194, 58, .12), 0 0 6px rgba(103, 194, 58, .1);
+        }
+
+        button {
+            color: #fff;
+            background-color: #67c23a;
+            border-color: #67c23a;
+        }
+
+        .main-table {
+            margin: auto;
+        }
+
+        body {
+            color: #5e6d82;
+        }
+
+        .predict {
+            border-top: 1px solid #ebeef5;
+            border-left: 1px solid #ebeef5;
+            text-align: center;
+        }
+
+        .predict td {
+            width: 50px;
+            border-bottom: 1px solid #ebeef5;
+            border-right: 1px solid #ebeef5;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <table class="main-table">
+        <tr>
+            <td align="center" style="padding: 40px">
+                <label>手写数字</label><br/>
+                <canvas id="myCanvas" width="100" height="100"></canvas>
+            </td>
+            <td>
+                <label id="predict-label" style="line-height: 40px">预测值：NAN，概率：NAN%，处理后的图片：</label><img
+                    id="pre_process" alt="" src=""/>
+                <table class="predict" cellspacing="0" id="predict-table">
+                    <tr>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                    </tr>
+                </table>
+                <br/>
+                <button onclick="submit()">提交</button>
+                <button onclick="ctx.reset()">清除</button>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+    const c = document.getElementById("myCanvas");
+    const ctx = c.getContext("2d");
+    let x, y
+    c.onmousedown = function (e) {
+        x = e.offsetX
+        y = e.offsetY
+        c.onmousemove = function (e) {
+            const newX = e.offsetX;
+            const newY = e.offsetY;
+            ctx.lineWidth = 10
+            ctx.moveTo(x, y)
+            ctx.lineTo(newX, newY)
+            ctx.stroke()
+            x = newX
+            y = newY
+        }
+    }
+    c.onmouseout = function (e) {
+        c.onmousemove = null
+    }
+    c.onmouseup = function (e) {
+        c.onmousemove = null
+    }
+
+    function submit() {
+        $.post("/submit/", {"data": c.toDataURL("image/png")},
+            function (data) {
+                // 计算最大值，并拼接表格数据
+                let m = -999.0;
+                let i = -1;
+                let predict_table_percent = "";
+                data[0][0].forEach((v, k) => {
+                        if (v > m) {
+                            m = v
+                            i = k
+                        }
+                        predict_table_percent += "<td>" + Math.round(v * 10000) / 100 + "%</td>"
+                    }
+                )
+                $("#predict-label").html("预测值：" + i + "，概率：" + Math.round(m * 10000) / 100 + "%，处理后的图片：")
+                $("#predict-table tr").last().html(predict_table_percent)
+                // 高亮表格中预估值
+                let tds = $("#predict-table td")
+                tds.css("background-color", "").css("color", "")
+                tds.eq(i).css("background-color", "#f0f9eb").css("color", "#67c23a")
+                tds.eq(i + 10).css("background-color", "#f0f9eb").css("color", "#67c23a")
+                // 将处理的图片显示在上面
+                $("#pre_process").attr("src", "data:image/jpeg;base64," + data[1])
+            }, "json"
+        )
+    }
+</script>
+</body>
+</html>

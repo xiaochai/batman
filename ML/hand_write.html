@@ -1,0 +1,172 @@
+<html lang="en">
+
+<head>
+    <title>Hand Write Number Recognize</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <style>
+        .main {
+            text-align: center;
+        }
+
+        #myCanvas {
+            border: 1px solid rgb(103, 194, 58);
+            box-shadow: 0 2px 4px rgba(103, 194, 58, .12), 0 0 6px rgba(103, 194, 58, .1);
+        }
+
+        button {
+            color: #fff;
+            background-color: #67c23a;
+            border-color: #67c23a;
+        }
+
+        .main-table {
+            margin: auto;
+        }
+
+        body {
+            color: #5e6d82;
+        }
+
+        .predict {
+            border-top: 1px solid #ebeef5;
+            border-left: 1px solid #ebeef5;
+            text-align: center;
+        }
+
+        .predict td {
+            width: 50px;
+            border-bottom: 1px solid #ebeef5;
+            border-right: 1px solid #ebeef5;
+        }
+    </style>
+</head>
+<body>
+<div class="main">
+    <table class="main-table">
+        <tr>
+            <td align="center" style="padding: 40px">
+                <label>手写数字</label><br/>
+                <canvas id="myCanvas" width="100" height="100"></canvas>
+            </td>
+            <td>
+                <label id="predict-label" style="line-height: 40px">预测值：NAN，概率：NAN%，处理后的图片：</label><img
+                    id="pre_process" alt="" src=""/>
+                <table class="predict" cellspacing="0" id="predict-table">
+                    <tr>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                        <td>NAN</td>
+                    </tr>
+                </table>
+                <br/>
+                <button onclick="submit()">提交</button>
+                <button onclick="ctx.reset()">清除</button>
+            </td>
+        </tr>
+    </table>
+    <canvas id="shadowCanvas" width="28" height="28" style="display: none;border: 1px solid red;"></canvas>
+</div>
+<script>
+    const c = document.getElementById("myCanvas");
+    const ctx = c.getContext("2d");
+    let x, y
+    c.onmousedown = function (e) {
+        x = e.offsetX
+        y = e.offsetY
+        c.onmousemove = function (e) {
+            const newX = e.offsetX;
+            const newY = e.offsetY;
+            ctx.lineWidth = 10
+            ctx.moveTo(x, y)
+            ctx.lineTo(newX, newY)
+            ctx.stroke()
+            x = newX
+            y = newY
+        }
+    }
+    c.onmouseout = function (e) {
+        c.onmousemove = null
+    }
+    c.onmouseup = function (e) {
+        c.onmousemove = null
+    }
+
+    function submit() {
+        // 处理图像
+        // 获取辅助的Canvas
+        const shadow = document.getElementById("shadowCanvas");
+        const shadow_ctx = shadow.getContext("2d");
+        // 由于背景是透明的，在处理灰度时会有问题，所以先填充上背景
+        shadow_ctx.fillStyle = "white"
+        shadow_ctx.strokeStyle = "white"
+        shadow_ctx.fillRect(0, 0, 28, 28)
+        // 将手写的图像复制到辅助Canvas上，指定宽高从而实现缩放
+        shadow_ctx.drawImage(c, 0, 0, 28, 28);
+        // 取出像素值，对像素值进行数值计算，来达到灰度化和反相的目的
+        const imageData = shadow_ctx.getImageData(0, 0, 28, 28)
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            // 使用平均值法取灰度，并使用255-平均值取反相
+            const avg = 255 - (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = avg; // red
+            data[i + 1] = avg; // green
+            data[i + 2] = avg; // blue
+        }
+        shadow_ctx.putImageData(imageData, 0, 0);
+        // 将辅助Canvas的图像展示到pre_process上，后续对这个图像做模型预估即可
+        $("#pre_process").attr("src", shadow.toDataURL("image/png")).one("load", function () {
+            predict()
+        })
+    }
+
+    let model
+    tf.loadLayersModel('./hand_write_model_with_cnn_tfjs/model.json').then(function (m){
+        model = m
+    })
+
+    async function predict() {
+        const raw_data = tf.browser.fromPixels(document.getElementById("pre_process"), 1).div(255.0);
+        const prediction = model.predict(raw_data.reshape([1, 28, 28, 1]));
+        prediction.print()
+
+        let m = -999.0;
+        let i = -1;
+        let predict_table_percent = "";
+        prediction.dataSync().forEach((v, k) => {
+                if (v > m) {
+                    m = v
+                    i = k
+                }
+                predict_table_percent += "<td>" + Math.round(v * 10000) / 100 + "%</td>"
+            }
+        )
+        $("#predict-label").html("预测值：" + i + "，概率：" + Math.round(m * 10000) / 100 + "%，处理后的图片：")
+        $("#predict-table tr").last().html(predict_table_percent)
+        let tds = $("#predict-table td")
+        tds.css("background-color", "").css("color", "")
+        tds.eq(i).css("background-color", "#f0f9eb").css("color", "#67c23a")
+        tds.eq(i + 10).css("background-color", "#f0f9eb").css("color", "#67c23a")
+    }
+</script>
+</body>
+</html>
